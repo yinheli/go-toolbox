@@ -16,7 +16,7 @@ var (
 	Sugar  *zap.SugaredLogger
 )
 
-type Log struct {
+type Config struct {
 	Level   string `yaml:"level" toml:"level"`
 	File    string `yaml:"file" toml:"file"`
 	Format  string `yaml:"format" toml:"format"`
@@ -26,13 +26,13 @@ type Log struct {
 }
 
 func init() {
-	cfg := Log{
+	cfg := Config{
 		Level: "debug",
 	}
 	ConfigLogger(&cfg)
 }
 
-func ConfigLogger(cfg *Log) {
+func ConfigLogger(cfg *Config) {
 	var err error
 
 	ws := make([]zapcore.WriteSyncer, 0, 2)
