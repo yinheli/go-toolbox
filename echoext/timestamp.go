@@ -4,6 +4,7 @@ import (
 	"database/sql/driver"
 	"fmt"
 	"strconv"
+	"strings"
 	"time"
 )
 
@@ -30,6 +31,23 @@ func (t *Timestamp) MarshalJSON() ([]byte, error) {
 		return []byte(fmt.Sprintf(`"%d"`, ts.UnixNano()/int64(time.Millisecond))), nil
 	}
 	return nil, nil
+}
+
+func (t *Timestamp) UnmarshalJSON(p []byte) error {
+	data := string(p)
+	if data == "null" {
+		return nil
+	}
+
+	if p != nil {
+		i, err := strconv.ParseInt(strings.Replace(data, `"`, "", -1), 10, 64)
+		if err != nil {
+			return err
+		}
+
+		*t = Timestamp(time.Unix(0, int64(time.Millisecond) * i))
+	}
+	return nil
 }
 
 // for sql log, print readable format
