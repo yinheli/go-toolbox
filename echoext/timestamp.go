@@ -18,7 +18,7 @@ func (t *Timestamp) UnmarshalParam(src string) error {
 			return err
 		}
 
-		ts := time.Unix(0, m*int64(time.Millisecond))
+		ts := time.Unix(0, m*int64(time.Millisecond)).Local()
 		*t = Timestamp(ts)
 	}
 	return nil
@@ -45,7 +45,7 @@ func (t *Timestamp) UnmarshalJSON(p []byte) error {
 			return err
 		}
 
-		*t = Timestamp(time.Unix(0, int64(time.Millisecond) * i))
+		*t = Timestamp(time.Unix(0, int64(time.Millisecond)*i))
 	}
 	return nil
 }

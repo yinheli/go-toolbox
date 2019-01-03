@@ -8,7 +8,7 @@ import (
 )
 
 var (
-	scopeRE = regexp.MustCompile(`(?m)sql\s+.*?scope\.go\:\d+`)
+	scopeRE = regexp.MustCompile(`(?m)sql\s+.*?\.go\:\d+`)
 )
 
 type dbLogger struct {
