@@ -20,6 +20,7 @@ type Config struct {
 	Level   string `yaml:"level" toml:"level"`
 	File    string `yaml:"file" toml:"file"`
 	Format  string `yaml:"format" toml:"format"`
+	Caller  bool   `yaml:"caller" toml:"caller"`
 	MaxSize int    `yaml:"max-size" toml:"max-size"`
 	MaxDays int    `yaml:"max-days" toml:"max-days"`
 	Rotate  bool   `yaml:"rotate" toml:"rotate"`
@@ -77,7 +78,7 @@ func ConfigLogger(cfg *Config) {
 
 	options := make([]zap.Option, 0, 3)
 	options = append(options, zap.AddStacktrace(zapcore.ErrorLevel))
-	if level.Enabled(zapcore.DebugLevel) {
+	if cfg.Caller && level.Enabled(zapcore.DebugLevel) {
 		options = append(options, zap.AddCaller(), zap.AddCallerSkip(1))
 	}
 	Logger = zap.New(core, options...)
