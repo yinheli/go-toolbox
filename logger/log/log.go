@@ -4,6 +4,7 @@ import (
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 	"gopkg.in/natefinch/lumberjack.v2"
+	"io"
 	"log"
 	"os"
 	"os/signal"
@@ -12,6 +13,7 @@ import (
 )
 
 var (
+	writer io.Writer
 	Logger *zap.Logger
 	Sugar  *zap.SugaredLogger
 )
@@ -60,6 +62,7 @@ func ConfigLogger(cfg *Config) {
 	}
 
 	writeSyncer := zapcore.NewMultiWriteSyncer(ws...)
+	writer = writeSyncer
 
 	encodingCfg := zap.NewProductionEncoderConfig()
 	encodingCfg.EncodeTime = zapcore.ISO8601TimeEncoder

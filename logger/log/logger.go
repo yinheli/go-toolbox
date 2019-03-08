@@ -3,6 +3,7 @@ package log
 import (
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
+	"io"
 )
 
 func Named(s string) *zap.Logger {
@@ -47,6 +48,10 @@ func Panic(msg string, fields ...zap.Field) {
 
 func Fatal(msg string, fields ...zap.Field) {
 	Logger.Fatal(msg, fields...)
+}
+
+func Writer() io.Writer {
+	return writer
 }
 
 func Sync() {

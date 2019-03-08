@@ -8,7 +8,6 @@ all: help
 fmt:
 	# gofmt code
 	@gofmt -s -l -w $(SRC_DIR)
-	@go tool vet $(SRC_DIR)
 
 .PHONY: test
 test:
