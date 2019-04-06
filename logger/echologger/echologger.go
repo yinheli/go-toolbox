@@ -46,7 +46,7 @@ func (t *Logger) SetLevel(v log.Lvl) {
 }
 
 func (t *Logger) SetHeader(h string) {
-	// not head
+	// not work
 }
 
 func (t *Logger) Print(i ...interface{}) {
@@ -126,7 +126,7 @@ func (t *Logger) Panic(i ...interface{}) {
 }
 
 func (t *Logger) Panicj(j log.JSON) {
-	t.log.Panic(i)
+	t.log.Panic(j)
 }
 
 func (t *Logger) Panicf(format string, args ...interface{}) {
