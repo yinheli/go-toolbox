@@ -8,14 +8,17 @@ import (
 	"log"
 	"os"
 	"os/signal"
+	"path/filepath"
+	"strings"
 	"syscall"
 	"time"
 )
 
 var (
-	writer io.Writer
-	Logger *zap.Logger
-	Sugar  *zap.SugaredLogger
+	currentCfg *Config
+	writer     io.Writer
+	logger     *zap.Logger
+	Sugar      *zap.SugaredLogger
 )
 
 type Config struct {
@@ -36,6 +39,22 @@ func init() {
 }
 
 func ConfigLogger(cfg *Config) {
+	currentCfg = cfg
+	logger = NewLoggerWithConfig(cfg)
+	Sugar = logger.Sugar()
+}
+
+func NewLogger(file string) *zap.Logger {
+	cfg := *currentCfg
+	if cfg.File != "" {
+		cfg.File = filepath.Join(filepath.Dir(cfg.File), file)
+	} else {
+		cfg.File = file
+	}
+	return NewLoggerWithConfig(&cfg)
+}
+
+func NewLoggerWithConfig(cfg *Config) *zap.Logger {
 	var err error
 
 	ws := make([]zapcore.WriteSyncer, 0, 2)
@@ -61,21 +80,21 @@ func ConfigLogger(cfg *Config) {
 		log.Fatal(err)
 	}
 
-	writeSyncer := zapcore.NewMultiWriteSyncer(ws...)
-	writer = writeSyncer
+	writeSynced := zapcore.NewMultiWriteSyncer(ws...)
+	writer = writeSynced
 
 	encodingCfg := zap.NewProductionEncoderConfig()
 	encodingCfg.EncodeTime = zapcore.ISO8601TimeEncoder
 
 	var encoder zapcore.Encoder
-	if cfg.Format == "json" {
+	if strings.ToLower(cfg.Format) == "json" {
 		encoder = zapcore.NewJSONEncoder(encodingCfg)
 	} else {
 		encoder = zapcore.NewConsoleEncoder(encodingCfg)
 	}
 	core := zapcore.NewCore(
 		encoder,
-		writeSyncer,
+		writeSynced,
 		level,
 	)
 
@@ -84,22 +103,20 @@ func ConfigLogger(cfg *Config) {
 	if cfg.Caller && level.Enabled(zapcore.DebugLevel) {
 		options = append(options, zap.AddCaller(), zap.AddCallerSkip(1))
 	}
-	Logger = zap.New(core, options...)
-	if err != nil {
-		log.Fatal(err)
-	}
-	Sugar = Logger.Sugar()
+	lg := zap.New(core, options...)
+
+	return lg
 }
 
 func scheduleRotate(log *lumberjack.Logger) {
 	// signal
 	go func() {
 		ch := make(chan os.Signal, 1)
-		signal.Notify(ch, syscall.SIGHUP)
+		signal.Notify(ch, syscall.SIGHUP, syscall.SIGTERM)
 		for {
 			<-ch
-			Logger.Sync()
-			log.Rotate()
+			_ = logger.Sync()
+			_ = log.Rotate()
 		}
 	}()
 
@@ -107,9 +124,9 @@ func scheduleRotate(log *lumberjack.Logger) {
 	for {
 		n := time.Now().Add(time.Hour * 24)
 		next := time.Date(n.Year(), n.Month(), n.Day(), 0, 0, 0, 0, time.Local)
-		d := next.Sub(time.Now())
+		d := time.Until(next)
 		time.Sleep(d)
-		Logger.Sync()
-		log.Rotate()
+		_ = logger.Sync()
+		_ = log.Rotate()
 	}
 }
