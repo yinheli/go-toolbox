@@ -48,10 +48,12 @@ func NewLogger(file string) *zap.Logger {
 	cfg := *currentCfg
 	if cfg.File != "" {
 		cfg.File = filepath.Join(filepath.Dir(cfg.File), file)
-	} else {
-		cfg.File = file
 	}
-	return NewLoggerWithConfig(&cfg)
+	lg := NewLoggerWithConfig(&cfg)
+	if cfg.File == "" && file != "" {
+		lg = lg.Named(file)
+	}
+	return lg
 }
 
 func NewLoggerWithConfig(cfg *Config) *zap.Logger {
