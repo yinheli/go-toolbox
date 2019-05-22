@@ -31,7 +31,7 @@ func Fmt() error {
 			items = append(items, it.Name())
 		}
 	}
-	return sh.Run("gofmt", append([]string{"-s", "-l", "-w"}, items...)...)
+	return sh.RunV("gofmt", append([]string{"-s", "-l", "-w"}, items...)...)
 }
 
 // golangci-lint

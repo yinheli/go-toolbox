@@ -15,10 +15,11 @@ import (
 )
 
 var (
-	currentCfg *Config
-	writer     io.Writer
-	logger     *zap.Logger
-	Sugar      *zap.SugaredLogger
+	currentCfg  *Config
+	writer      io.Writer
+	logger      *zap.Logger
+	Sugar       *zap.SugaredLogger
+	atomicLevel zap.AtomicLevel
 )
 
 type Config struct {
@@ -82,6 +83,8 @@ func NewLoggerWithConfig(cfg *Config) *zap.Logger {
 		log.Fatal(err)
 	}
 
+	atomicLevel = zap.NewAtomicLevelAt(level)
+
 	writeSynced := zapcore.NewMultiWriteSyncer(ws...)
 	writer = writeSynced
 
@@ -97,7 +100,7 @@ func NewLoggerWithConfig(cfg *Config) *zap.Logger {
 	core := zapcore.NewCore(
 		encoder,
 		writeSynced,
-		level,
+		atomicLevel,
 	)
 
 	options := make([]zap.Option, 0, 3)

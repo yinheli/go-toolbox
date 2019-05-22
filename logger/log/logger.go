@@ -50,6 +50,14 @@ func Fatal(msg string, fields ...zap.Field) {
 	logger.Fatal(msg, fields...)
 }
 
+func SetLevel(level zapcore.Level) {
+	atomicLevel.SetLevel(level)
+}
+
+func Logger() *zap.Logger {
+	return logger
+}
+
 func Writer() io.Writer {
 	return writer
 }
