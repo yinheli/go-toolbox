@@ -7,6 +7,12 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
+func ConfigEchoValidator(e *echo.Echo) {
+	validator := NewValidator()
+	e.Validator = validator
+	e.Binder = validator.WrapBinder(e.Binder)
+}
+
 type Validator struct {
 	originBinder echo.Binder
 }
