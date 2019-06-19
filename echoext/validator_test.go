@@ -10,6 +10,10 @@ func TestValidator_validate(t *testing.T) {
 		InnerName string `validate:"required"`
 	}
 
+	type inner struct {
+		InnerName string `validate:"required"`
+	}
+
 	tests := []struct {
 		name    string
 		obj     interface{}
@@ -78,6 +82,22 @@ func TestValidator_validate(t *testing.T) {
 			obj: &struct {
 				Inner Inner
 			}{Inner: Inner{InnerName: "ok"}},
+			wantErr: false,
+		},
+
+		{
+			name: "unexported inner",
+			obj: &struct {
+				inner Inner
+			}{inner: Inner{InnerName: "ok"}},
+			wantErr: false,
+		},
+
+		{
+			name: "unexported inner 2",
+			obj: &struct {
+				inner
+			}{inner: inner{InnerName: ""}},
 			wantErr: false,
 		},
 	}
