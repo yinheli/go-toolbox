@@ -57,8 +57,10 @@ func (v *Validator) validate(i interface{}) error {
 		field := val.Field(i)
 		switch field.Kind() {
 		case reflect.Ptr, reflect.Struct:
-			if err := v.validate(field.Interface()); err != nil {
-				return err
+			if field.CanInterface() {
+				if err := v.validate(field.Interface()); err != nil {
+					return err
+				}
 			}
 		}
 	}
