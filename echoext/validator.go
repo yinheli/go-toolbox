@@ -67,7 +67,12 @@ func (v *Validator) validate(i interface{}) error {
 		}
 	}
 
-	return v.Validate(i)
+	if val.Kind() == reflect.Struct {
+		return v.Validate(i)
+	}
+
+	return nil
+
 }
 
 func (v *Validator) Bind(i interface{}, c echo.Context) error {
