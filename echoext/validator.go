@@ -53,13 +53,15 @@ func (v *Validator) validate(i interface{}) error {
 		val = reflect.Indirect(val)
 	}
 
-	for i := 0; i < val.NumField(); i++ {
-		field := val.Field(i)
-		switch field.Kind() {
-		case reflect.Ptr, reflect.Struct:
-			if field.CanInterface() {
-				if err := v.validate(field.Interface()); err != nil {
-					return err
+	if val.Kind() == reflect.Struct {
+		for i := 0; i < val.NumField(); i++ {
+			field := val.Field(i)
+			switch field.Kind() {
+			case reflect.Ptr, reflect.Struct:
+				if field.CanInterface() {
+					if err := v.validate(field.Interface()); err != nil {
+						return err
+					}
 				}
 			}
 		}

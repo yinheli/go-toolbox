@@ -100,6 +100,22 @@ func TestValidator_validate(t *testing.T) {
 			}{inner: inner{InnerName: ""}},
 			wantErr: false,
 		},
+
+		{
+			name: "point innter 1",
+			obj: &struct {
+				Inner *Inner `json:"inner" validate:"required"`
+			}{},
+			wantErr: true,
+		},
+
+		{
+			name: "point innter 2",
+			obj: &struct {
+				Inner *Inner `json:"inner" validate:"required"`
+			}{Inner: &Inner{InnerName: "OK"}},
+			wantErr: false,
+		},
 	}
 	for _, tt := range tests {
 		v := &Validator{}
