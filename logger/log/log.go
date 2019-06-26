@@ -121,7 +121,6 @@ func scheduleRotate(log *lumberjack.Logger) {
 		for {
 			<-ch
 			_ = logger.Sync()
-			_ = log.Rotate()
 		}
 	}()
 
