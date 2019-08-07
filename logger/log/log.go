@@ -7,10 +7,8 @@ import (
 	"io"
 	"log"
 	"os"
-	"os/signal"
 	"path/filepath"
 	"strings"
-	"syscall"
 	"time"
 )
 
@@ -114,23 +112,11 @@ func NewLoggerWithConfig(cfg *Config) *zap.Logger {
 }
 
 func scheduleRotate(log *lumberjack.Logger) {
-	// signal
-	go func() {
-		ch := make(chan os.Signal, 1)
-		signal.Notify(ch, syscall.SIGHUP, syscall.SIGTERM)
-		for {
-			<-ch
-			_ = logger.Sync()
-		}
-	}()
-
-	// time
 	for {
 		n := time.Now().Add(time.Hour * 24)
 		next := time.Date(n.Year(), n.Month(), n.Day(), 0, 0, 0, 0, time.Local)
 		d := time.Until(next)
 		time.Sleep(d)
-		_ = logger.Sync()
 		_ = log.Rotate()
 	}
 }
