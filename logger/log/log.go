@@ -1,15 +1,15 @@
 package log
 
 import (
-	"go.uber.org/zap"
-	"go.uber.org/zap/zapcore"
-	"gopkg.in/natefinch/lumberjack.v2"
 	"io"
-	"log"
 	"os"
 	"path/filepath"
 	"strings"
 	"time"
+
+	"go.uber.org/zap"
+	"go.uber.org/zap/zapcore"
+	"gopkg.in/natefinch/lumberjack.v2"
 )
 
 var (
@@ -21,13 +21,13 @@ var (
 )
 
 type Config struct {
-	Level   string `yaml:"level" toml:"level"`
-	File    string `yaml:"file" toml:"file"`
-	Format  string `yaml:"format" toml:"format"`
-	Caller  bool   `yaml:"caller" toml:"caller"`
-	MaxSize int    `yaml:"max-size" toml:"max-size"`
-	MaxDays int    `yaml:"max-days" toml:"max-days"`
-	Rotate  bool   `yaml:"rotate" toml:"rotate"`
+	Level   string
+	File    string
+	Format  string
+	Caller  bool
+	MaxSize int
+	MaxDays int
+	Rotate  bool
 }
 
 func init() {
@@ -40,6 +40,7 @@ func init() {
 func ConfigLogger(cfg *Config) {
 	currentCfg = cfg
 	logger = NewLoggerWithConfig(cfg)
+	logger = logger.WithOptions(zap.AddCallerSkip(1))
 	Sugar = logger.Sugar()
 }
 
@@ -78,13 +79,10 @@ func NewLoggerWithConfig(cfg *Config) *zap.Logger {
 	var level zapcore.Level
 	err = level.UnmarshalText([]byte(cfg.Level))
 	if err != nil {
-		log.Fatal(err)
+		level = zap.InfoLevel
 	}
 
-	atomicLevel = zap.NewAtomicLevelAt(level)
-
-	writeSynced := zapcore.NewMultiWriteSyncer(ws...)
-	writer = writeSynced
+	writer := zapcore.NewMultiWriteSyncer(ws...)
 
 	encodingCfg := zap.NewProductionEncoderConfig()
 	encodingCfg.EncodeTime = zapcore.ISO8601TimeEncoder
@@ -97,14 +95,14 @@ func NewLoggerWithConfig(cfg *Config) *zap.Logger {
 	}
 	core := zapcore.NewCore(
 		encoder,
-		writeSynced,
-		atomicLevel,
+		writer,
+		zap.NewAtomicLevelAt(level),
 	)
 
-	options := make([]zap.Option, 0, 3)
+	options := make([]zap.Option, 0)
 	options = append(options, zap.AddStacktrace(zapcore.ErrorLevel))
 	if cfg.Caller && level.Enabled(zapcore.DebugLevel) {
-		options = append(options, zap.AddCaller(), zap.AddCallerSkip(1))
+		options = append(options, zap.AddCaller())
 	}
 	lg := zap.New(core, options...)
 

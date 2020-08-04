@@ -1,9 +1,10 @@
 package log
 
 import (
+	"io"
+
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
-	"io"
 )
 
 func Named(s string) *zap.Logger {
@@ -15,7 +16,7 @@ func WithOptions(opts ...zap.Option) *zap.Logger {
 }
 
 func With(fields ...zap.Field) *zap.Logger {
-	return logger.WithOptions(zap.AddCallerSkip(-1)).With(fields...)
+	return logger.With(fields...)
 }
 
 func Check(lvl zapcore.Level, msg string) *zapcore.CheckedEntry {
